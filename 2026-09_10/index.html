@@ -2553,6 +2553,8 @@ video {
         <!-- === HUB MODULE - START (exercises view) === -->
         <style>
             /* Karty cwiczen - wzor: osobne pliki z testami (future-forms.html) */
+            .hub-ex-lesson { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--hub-muted, #6b7280); margin: 22px 4px 8px; padding-bottom: 6px; border-bottom: 1px solid var(--hub-line); }
+            .hub-ex-lesson:first-child { margin-top: 0; }
             .hub-ex-card { background: #fff; border: 1px solid var(--hub-line); border-radius: 16px; padding: 18px 20px 16px;
                 margin: 0 0 18px; box-shadow: 0 6px 20px rgba(22,24,29,.05); }
             .hub-ex-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; list-style: none; }
@@ -6831,6 +6833,7 @@ video {
                 return;
             }
             EXERCISES.forEach(function (ex, exIdx) { if (ex.layout === 'wordform') wfPrepare(exIdx, false); });
+            var exMultiLesson = EXERCISES.some(function (e) { return e.lessonLabel !== EXERCISES[0].lessonLabel; });
             function exCardsHtml(openIdx) { return EXERCISES.map(function (ex, exIdx) {
                 var gapNo = 0;
                 // Szerokosc pola wg najdluzszej odpowiedzi w calym cwiczeniu (nie w luce),
@@ -6936,7 +6939,13 @@ video {
                     : '';
                 // Rozwiniete tylko pierwsze cwiczenie - cala lista naraz przytlacza.
                 var gapTotal = ex.items.reduce(function (s, it) { return s + (it.answers || []).length; }, 0);
-                return '<details class="hub-lesson-group hub-ex-card"' + (exIdx === openIdx ? ' open' : '') + '>' +
+                // Podzial na lekcje (2026-10-07): naglowek przed pierwszym cwiczeniem
+                // kazdej lekcji, tylko gdy cwiczenia pochodza z wiecej niz jednej lekcji.
+                var sep = (exMultiLesson && (exIdx === 0 || EXERCISES[exIdx - 1].lessonLabel !== ex.lessonLabel))
+                    ? '<h3 class="hub-ex-lesson">' + escapeHtml(ex.lessonLabel || '') +
+                      (ex.dateLabel ? ' &middot; ' + escapeHtml(ex.dateLabel) : '') + '</h3>'
+                    : '';
+                return sep + '<details class="hub-lesson-group hub-ex-card"' + (exIdx === openIdx ? ' open' : '') + '>' +
                     '<summary class="hub-ex-head"><span class="hub-ex-title">' + escapeHtml(ex.title || '') + '</span>' +
                     (isSelf ? '' : '<span class="hub-ex-score" data-ex-score="' + exIdx + '" data-ex-total="' + gapTotal + '">&ndash; / ' + gapTotal + '</span>') +
                     '</summary>' +
